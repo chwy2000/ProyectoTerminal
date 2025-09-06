@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procesador CSV con TensorFlow.js</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <style>
         :root {
             --primary-color: #4285f4;
@@ -244,7 +243,7 @@
     <div class="container">
         <header>
             <h1>Procesador de CSV con TensorFlow.js</h1>
-            <p class="description">Carga y analiza archivos CSV directamente en tu navegador utilizando el poder de TensorFlow.js para machine learning. Todo el procesamiento se realiza localmente, tus datos nunca se envían a ningún servidor.</p>
+            <p class="description">Carga y analiza archivos CSV directamente en tu navegador utilizando el poder de TensorFlow.js. Todo el procesamiento se realiza localmente, tus datos nunca se envían a ningún servidor.</p>
         </header>
         
         <div class="main-content">
@@ -300,7 +299,7 @@
         </div>
         
         <footer>
-            <p>Esta aplicación utiliza TensorFlow.js y PapaParse para procesar archivos CSV directamente en el navegador.</p>
+            <p>Esta aplicación utiliza TensorFlow.js para procesar archivos CSV directamente en el navegador.</p>
             <p>Para usar en GitHub Pages, guarda este código como <strong>index.html</strong> en tu repositorio.</p>
         </footer>
     </div>
@@ -336,21 +335,44 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Función para parsear el CSV
+        // Función para parsear el CSV (sin PapaParse)
         function parseCSV(csvText) {
-            Papa.parse(csvText, {
-                header: true,
-                dynamicTyping: true,
-                complete: function(results) {
-                    csvData = results;
-                    displayDataPreview(results.data);
-                    console.log('Datos CSV parseados:', results.data);
-                },
-                error: function(error) {
-                    console.error('Error al parsear CSV:', error);
-                    alert('Error al procesar el archivo CSV.');
+            try {
+                const lines = csvText.split('\n');
+                if (lines.length < 2) {
+                    throw new Error('El archivo CSV no contiene suficientes líneas');
                 }
-            });
+                
+                // Obtener encabezados
+                const headers = lines[0].split(',').map(header => header.trim());
+                
+                // Procesar datos
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = lines[i].split(',').map(value => {
+                        const trimmed = value.trim();
+                        // Intentar convertir a número si es posible
+                        return isNaN(trimmed) || trimmed === '' ? trimmed : parseFloat(trimmed);
+                    });
+                    
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] !== undefined ? values[index] : '';
+                    });
+                    
+                    data.push(row);
+                }
+                
+                csvData = { data, headers };
+                displayDataPreview(data);
+                console.log('Datos CSV parseados:', data);
+                
+            } catch (error) {
+                console.error('Error al parsear CSV:', error);
+                alert('Error al procesar el archivo CSV: ' + error.message);
+            }
         }
 
         // Mostrar vista previa de los datos
