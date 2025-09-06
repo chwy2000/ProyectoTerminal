@@ -7,63 +7,536 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --accent-color: #ea4335;
+            --light-color: #f8f9fa;
+            --dark-color: #202124;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
         }
-        .container {
-            border: 1px solid #ddd;
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             padding: 20px;
-            border-radius: 5px;
             margin-bottom: 20px;
         }
-        #results {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
+        
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
         }
-        .hidden {
+        
+        .file-upload {
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+        
+        .file-input {
             display: none;
         }
+        
+        .upload-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background: #3367d6;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #2d9249;
+        }
+        
+        .btn-secondary {
+            background: var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #3367d6;
+        }
+        
+        .btn-danger {
+            background: var(--accent-color);
+        }
+        
+        .btn-danger:hover {
+            background: #d33426;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .results-content {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
         }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
+        
         th {
-            background-color: #f2f2f2;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e7f3ff;
+            border-radius: var(--border-radius);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Procesador de CSV con TensorFlow.js</h1>
-    
     <div class="container">
-        <h2>Subir archivo CSV</h2>
-        <input type="file" id="csvFile" accept=".csv">
-        <div id="fileInfo"></div>
+        <header>
+            <h1>Procesador de CSV con TensorFlow.js</h1>
+            <p class="description">Carga y analiza archivos CSV directamente en tu navegador utilizando el poder de TensorFlow.js para machine learning. Todo el procesamiento se realiza localmente, tus datos nunca se envían a ningún servidor.</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <h2>Cargar archivo CSV</h2>
+                    <div class="file-upload">
+                        <p>Selecciona un archivo CSV para procesar</p>
+                        <input type="file" id="csvFile" accept=".csv" class="file-input">
+                        <label for="csvFile" class="upload-btn">Seleccionar archivo</label>
+                        <div id="fileInfo" class="file-info"></div>
+                    </div>
+                    
+                    <div id="processingOptions">
+                        <h3>Opciones de procesamiento</h3>
+                        <button onclick="loadAndProcessCSV()" class="btn">Analizar datos</button>
+                        <button onclick="trainSimpleModel()" class="btn btn-secondary">Entrenar modelo</button>
+                        <button onclick="resetAll()" class="btn btn-danger">Reiniciar</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Características</h2>
+                    <ul class="feature-list">
+                        <li>Procesamiento 100% en el navegador</li>
+                        <li>Visualización de datos CSV</li>
+                        <li>Análisis estadístico básico</li>
+                        <li>Entrenamiento de modelos de machine learning</li>
+                        <li>Resultados en tiempo real</li>
+                        <li>No se requiere instalación de software</li>
+                        <li>Tus datos nunca salen de tu dispositivo</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="card">
+                    <h2>Resultados del análisis</h2>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Procesando datos...</p>
+                    </div>
+                    <div id="results" class="results">
+                        <div id="output" class="results-content"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Vista previa de datos</h2>
+                    <div id="dataPreview" class="results-content"></div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Esta aplicación utiliza TensorFlow.js y PapaParse para procesar archivos CSV directamente en el navegador.</p>
+            <p>Para usar en GitHub Pages, guarda este código como <strong>index.html</strong> en tu repositorio.</p>
+        </footer>
     </div>
 
-    <div class="container hidden" id="processingOptions">
-        <h2>Opciones de procesamiento</h2>
-        <button onclick="loadAndProcessCSV()">Cargar y procesar CSV</button>
-        <button onclick="trainSimpleModel()">Entrenar modelo simple</button>
-    </div>
+    <script>
+        let csvData = null;
+        let tensorData = null;
 
-    <div id="results" class="hidden">
-        <h2>Resultados</h2>
-        <div id="output"></div>
-        <div id="dataPreview"></div>
-    </div>
+        // Event listener para cuando se selecciona un archivo
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                document.getElementById('fileInfo').textContent = `Archivo seleccionado: ${file.name} (${formatFileSize(file.size)})`;
+                
+                // Leer el archivo CSV
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvText = e.target.result;
+                    parseCSV(csvText);
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Por favor, selecciona un archivo CSV válido.');
+            }
+        });
 
-    <script src="script.js"></script>
+        // Función para formatear el tamaño del archivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Función para parsear el CSV
+        function parseCSV(csvText) {
+            Papa.parse(csvText, {
+                header: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    csvData = results;
+                    displayDataPreview(results.data);
+                    console.log('Datos CSV parseados:', results.data);
+                },
+                error: function(error) {
+                    console.error('Error al parsear CSV:', error);
+                    alert('Error al procesar el archivo CSV.');
+                }
+            });
+        }
+
+        // Mostrar vista previa de los datos
+        function displayDataPreview(data) {
+            const previewDiv = document.getElementById('dataPreview');
+            if (data && data.length > 0) {
+                let html = '<h3>Vista previa (primeras 5 filas):</h3>';
+                html += '<table><tr>';
+                
+                // Encabezados
+                Object.keys(data[0]).forEach(key => {
+                    html += `<th>${key}</th>`;
+                });
+                html += '</tr>';
+                
+                // Datos (primeras 5 filas)
+                for (let i = 0; i < Math.min(5, data.length); i++) {
+                    html += '<tr>';
+                    Object.values(data[i]).forEach(value => {
+                        html += `<td>${value}</td>`;
+                    });
+                    html += '</tr>';
+                }
+                html += '</table>';
+                
+                previewDiv.innerHTML = html;
+            } else {
+                previewDiv.innerHTML = '<p>No hay datos para mostrar.</p>';
+            }
+        }
+
+        // Cargar y procesar CSV
+        function loadAndProcessCSV() {
+            if (!csvData || csvData.data.length === 0) {
+                alert('Primero sube un archivo CSV válido.');
+                return;
+            }
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('output').innerHTML = '';
+            
+            // Simular procesamiento con TensorFlow.js
+            setTimeout(() => {
+                processWithTensorFlow(csvData.data);
+                document.getElementById('loading').style.display = 'none';
+            }, 1500);
+        }
+
+        // Procesar datos con TensorFlow.js
+        function processWithTensorFlow(data) {
+            try {
+                // Convertir datos a tensores
+                const numericData = data.map(row => {
+                    return Object.values(row).filter(val => typeof val === 'number');
+                }).filter(arr => arr.length > 0);
+                
+                if (numericData.length === 0) {
+                    throw new Error('No se encontraron datos numéricos en el CSV');
+                }
+                
+                tensorData = tf.tensor2d(numericData);
+                
+                // Realizar algunas operaciones básicas
+                const mean = tensorData.mean();
+                const max = tensorData.max();
+                const min = tensorData.min();
+                const std = tensorData.std();
+                
+                const output = `
+                    <h3>Análisis con TensorFlow.js</h3>
+                    <p><strong>Forma de los datos:</strong> ${tensorData.shape}</p>
+                    <p><strong>Valor medio:</strong> ${mean.dataSync()[0].toFixed(4)}</p>
+                    <p><strong>Valor máximo:</strong> ${max.dataSync()[0].toFixed(4)}</p>
+                    <p><strong>Valor mínimo:</strong> ${min.dataSync()[0].toFixed(4)}</p>
+                    <p><strong>Desviación estándar:</strong> ${std.dataSync()[0].toFixed(4)}</p>
+                    <p>Procesamiento completado exitosamente.</p>
+                `;
+                
+                document.getElementById('output').innerHTML = output;
+                
+            } catch (error) {
+                document.getElementById('output').innerHTML = `
+                    <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                    <p>Asegúrate de que el CSV contiene datos numéricos.</p>
+                `;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Entrenar un modelo simple de regresión
+        async function trainSimpleModel() {
+            if (!csvData || csvData.data.length === 0) {
+                alert('Primero sube un archivo CSV válido.');
+                return;
+            }
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('output').innerHTML = '';
+            
+            try {
+                // Filtrar datos no numéricos
+                const data = csvData.data.filter(row => {
+                    const values = Object.values(row);
+                    return values.every(val => val !== null && !isNaN(val));
+                });
+                
+                if (data.length < 10) {
+                    throw new Error('Se necesitan al menos 10 filas de datos numéricos completos');
+                }
+                
+                // Supongamos que la última columna es la variable objetivo
+                const features = data.map(row => {
+                    const values = Object.values(row);
+                    return values.slice(0, -1); // Todas excepto la última
+                });
+                
+                const labels = data.map(row => {
+                    const values = Object.values(row);
+                    return values[values.length - 1]; // Última columna
+                });
+                
+                // Convertir a tensores
+                const featureTensor = tf.tensor2d(features);
+                const labelTensor = tf.tensor1d(labels);
+                
+                // Crear y entrenar modelo
+                const model = tf.sequential();
+                model.add(tf.layers.dense({units: 10, activation: 'relu', inputShape: [features[0].length]}));
+                model.add(tf.layers.dense({units: 1}));
+                
+                model.compile({optimizer: 'adam', loss: 'meanSquaredError'});
+                
+                // Entrenar el modelo
+                await model.fit(featureTensor, labelTensor, {
+                    epochs: 100,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            if (epoch % 20 === 0) {
+                                console.log(`Época ${epoch}: pérdida = ${logs.loss}`);
+                            }
+                        }
+                    }
+                });
+                
+                // Evaluar el modelo
+                const loss = (await model.evaluate(featureTensor, labelTensor)).dataSync()[0];
+                
+                document.getElementById('output').innerHTML = `
+                    <h3>Modelo entrenado exitosamente</h3>
+                    <p><strong>Pérdida final:</strong> ${loss.toFixed(4)}</p>
+                    <p><strong>Arquitectura del modelo:</strong></p>
+                    <ul>
+                        <li>Capa de entrada: ${features[0].length} neuronas</li>
+                        <li>Capa oculta: 10 neuronas (ReLU)</li>
+                        <li>Capa de salida: 1 neurona (lineal)</li>
+                    </ul>
+                    <p>Modelo listo para hacer predicciones.</p>
+                `;
+                
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                document.getElementById('output').innerHTML = `
+                    <p style="color: red;"><strong>Error en el entrenamiento:</strong> ${error.message}</p>
+                `;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Reiniciar toda la aplicación
+        function resetAll() {
+            document.getElementById('csvFile').value = '';
+            document.getElementById('fileInfo').textContent = '';
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('dataPreview').innerHTML = '';
+            document.getElementById('results').style.display = 'none';
+            csvData = null;
+            tensorData = null;
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Aplicación de procesamiento CSV inicializada');
+        });
+    </script>
 </body>
 </html>
