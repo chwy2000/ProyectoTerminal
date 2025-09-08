@@ -1,13 +1,9 @@
----
-layout: default
-title: Procesador CSV con TensorFlow.js
----
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }}</title>
+    <title>Procesador CSV con TensorFlow.js</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
     <style>
         * {
@@ -201,6 +197,27 @@ title: Procesador CSV con TensorFlow.js
                 margin-bottom: 10px;
             }
         }
+        
+        .instructions {
+            background-color: #fff4e6;
+            border: 1px solid #ffd8a8;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            color: #e67700;
+            margin-top: 0;
+        }
+        
+        code {
+            background-color: #f6f8fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid #e1e4e8;
+        }
     </style>
 </head>
 <body>
@@ -235,6 +252,23 @@ title: Procesador CSV con TensorFlow.js
             
             <h2>Vista previa de datos</h2>
             <div id="dataPreview" class="results-content"></div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instrucciones para GitHub Pages</h3>
+            <p>Para resolver el error de Jekyll, crea un archivo vacío llamado <code>.nojekyll</code> en la raíz de tu repositorio.</p>
+            <p>Puedes hacerlo con estos comandos:</p>
+            <pre>echo "" > .nojekyll
+git add .nojekyll
+git commit -m "Add .nojekyll to disable Jekyll processing"
+git push</pre>
+            <p>O mediante la interfaz web de GitHub:</p>
+            <ol>
+                <li>Ve a tu repositorio en GitHub</li>
+                <li>Haz clic en "Add file" → "Create new file"</li>
+                <li>Nombra el archivo <code>.nojekyll</code></li>
+                <li>Deja el contenido vacío y haz commit</li>
+            </ol>
         </div>
         
         <footer>
