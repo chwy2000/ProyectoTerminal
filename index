@@ -1,21 +1,15 @@
+---
+layout: default
+title: Procesador CSV con TensorFlow.js
+---
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procesador CSV con TensorFlow.js</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <title>{{ page.title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
     <style>
-        :root {
-            --primary-color: #4285f4;
-            --secondary-color: #34a853;
-            --accent-color: #ea4335;
-            --light-color: #f8f9fa;
-            --dark-color: #202124;
-            --border-radius: 8px;
-            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,78 +17,53 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #24292e;
+            background-color: #f6f8fa;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            padding: 30px;
+            border: 1px solid #e1e4e8;
         }
         
         header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e4e8;
         }
         
         h1 {
-            color: var(--primary-color);
+            color: #0366d6;
             margin-bottom: 10px;
         }
         
         .description {
-            color: #666;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 20px;
+            color: #586069;
             margin-bottom: 20px;
         }
         
-        .card h2 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-color);
-        }
-        
-        .file-upload {
-            border: 2px dashed #ccc;
-            border-radius: var(--border-radius);
-            padding: 30px;
+        .upload-section {
             text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            padding: 30px;
+            border: 2px dashed #d1d5da;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
         
-        .file-upload:hover {
-            border-color: var(--primary-color);
-            background-color: #f0f7ff;
+        .upload-section:hover {
+            border-color: #0366d6;
+            background-color: #f1f8ff;
         }
         
         .file-input {
@@ -103,85 +72,92 @@
         
         .upload-btn {
             display: inline-block;
-            padding: 12px 24px;
-            background: var(--primary-color);
+            padding: 10px 20px;
+            background: #0366d6;
             color: white;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s ease;
+            transition: background 0.2s ease;
+            margin-bottom: 15px;
         }
         
         .upload-btn:hover {
-            background: #3367d6;
+            background: #035fc7;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #dbedff;
+            border-radius: 6px;
+            border: 1px solid #c8e1ff;
+            font-size: 14px;
         }
         
         .btn {
-            padding: 10px 20px;
-            background: var(--secondary-color);
+            padding: 8px 16px;
+            background: #28a745;
             color: white;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: background 0.3s ease;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s ease;
         }
         
         .btn:hover {
-            background: #2d9249;
+            background: #269f42;
         }
         
         .btn-secondary {
-            background: var(--primary-color);
+            background: #0366d6;
         }
         
         .btn-secondary:hover {
-            background: #3367d6;
+            background: #035fc7;
         }
         
         .btn-danger {
-            background: var(--accent-color);
+            background: #cb2431;
         }
         
         .btn-danger:hover {
-            background: #d33426;
+            background: #b21f2d;
         }
         
         .results {
+            margin-top: 30px;
             display: none;
-            margin-top: 20px;
         }
         
         .results-content {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: var(--border-radius);
-            max-height: 300px;
-            overflow-y: auto;
+            padding: 20px;
+            background: #f6f8fa;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e4e8;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            font-size: 14px;
         }
         
         th, td {
-            padding: 10px;
+            padding: 8px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e1e4e8;
         }
         
         th {
-            background-color: var(--primary-color);
+            background-color: #0366d6;
             color: white;
-        }
-        
-        tr:hover {
-            background-color: #f5f5f5;
         }
         
         .loading {
@@ -191,11 +167,11 @@
         }
         
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0366d6;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
@@ -205,37 +181,25 @@
             100% { transform: rotate(360deg); }
         }
         
-        .file-info {
-            margin-top: 15px;
-            padding: 10px;
-            background: #e7f3ff;
-            border-radius: var(--border-radius);
-        }
-        
         footer {
             text-align: center;
             margin-top: 40px;
             padding: 20px;
-            color: #666;
+            color: #586069;
+            border-top: 1px solid #e1e4e8;
+            font-size: 14px;
         }
         
-        .feature-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        
-        .feature-list li {
-            padding: 8px 0;
-            padding-left: 30px;
-            position: relative;
-        }
-        
-        .feature-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--secondary-color);
-            font-weight: bold;
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .btn {
+                display: block;
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
@@ -243,59 +207,34 @@
     <div class="container">
         <header>
             <h1>Procesador de CSV con TensorFlow.js</h1>
-            <p class="description">Carga y analiza archivos CSV directamente en tu navegador utilizando el poder de TensorFlow.js. Todo el procesamiento se realiza localmente, tus datos nunca se envían a ningún servidor.</p>
+            <p class="description">Carga y analiza archivos CSV directamente en tu navegador utilizando TensorFlow.js</p>
         </header>
         
-        <div class="main-content">
-            <div class="left-column">
-                <div class="card">
-                    <h2>Cargar archivo CSV</h2>
-                    <div class="file-upload">
-                        <p>Selecciona un archivo CSV para procesar</p>
-                        <input type="file" id="csvFile" accept=".csv" class="file-input">
-                        <label for="csvFile" class="upload-btn">Seleccionar archivo</label>
-                        <div id="fileInfo" class="file-info"></div>
-                    </div>
-                    
-                    <div id="processingOptions">
-                        <h3>Opciones de procesamiento</h3>
-                        <button onclick="loadAndProcessCSV()" class="btn">Analizar datos</button>
-                        <button onclick="trainSimpleModel()" class="btn btn-secondary">Entrenar modelo</button>
-                        <button onclick="resetAll()" class="btn btn-danger">Reiniciar</button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2>Características</h2>
-                    <ul class="feature-list">
-                        <li>Procesamiento 100% en el navegador</li>
-                        <li>Visualización de datos CSV</li>
-                        <li>Análisis estadístico básico</li>
-                        <li>Entrenamiento de modelos de machine learning</li>
-                        <li>Resultados en tiempo real</li>
-                        <li>No se requiere instalación de software</li>
-                        <li>Tus datos nunca salen de tu dispositivo</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="upload-section">
+            <h2>Cargar archivo CSV</h2>
+            <input type="file" id="csvFile" accept=".csv" class="file-input">
+            <label for="csvFile" class="upload-btn">Seleccionar archivo CSV</label>
+            <div id="fileInfo" class="file-info"></div>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h3>Opciones de procesamiento</h3>
+            <button onclick="loadAndProcessCSV()" class="btn">Analizar datos</button>
+            <button onclick="trainSimpleModel()" class="btn btn-secondary">Entrenar modelo</button>
+            <button onclick="resetAll()" class="btn btn-danger">Reiniciar</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Procesando datos...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Resultados del análisis</h2>
+            <div id="output" class="results-content"></div>
             
-            <div class="right-column">
-                <div class="card">
-                    <h2>Resultados del análisis</h2>
-                    <div class="loading" id="loading">
-                        <div class="spinner"></div>
-                        <p>Procesando datos...</p>
-                    </div>
-                    <div id="results" class="results">
-                        <div id="output" class="results-content"></div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2>Vista previa de datos</h2>
-                    <div id="dataPreview" class="results-content"></div>
-                </div>
-            </div>
+            <h2>Vista previa de datos</h2>
+            <div id="dataPreview" class="results-content"></div>
         </div>
         
         <footer>
@@ -335,7 +274,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Función para parsear el CSV (sin PapaParse)
+        // Función para parsear el CSV
         function parseCSV(csvText) {
             try {
                 const lines = csvText.split('\n');
@@ -415,11 +354,11 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('output').innerHTML = '';
             
-            // Simular procesamiento con TensorFlow.js
+            // Procesar con TensorFlow.js después de un breve retraso
             setTimeout(() => {
                 processWithTensorFlow(csvData.data);
                 document.getElementById('loading').style.display = 'none';
-            }, 1500);
+            }, 500);
         }
 
         // Procesar datos con TensorFlow.js
@@ -456,7 +395,7 @@
                 
             } catch (error) {
                 document.getElementById('output').innerHTML = `
-                    <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                    <p style="color: #cb2431;"><strong>Error:</strong> ${error.message}</p>
                     <p>Asegúrate de que el CSV contiene datos numéricos.</p>
                 `;
                 document.getElementById('loading').style.display = 'none';
@@ -510,6 +449,7 @@
                 // Entrenar el modelo
                 await model.fit(featureTensor, labelTensor, {
                     epochs: 100,
+                    verbose: 0,
                     callbacks: {
                         onEpochEnd: (epoch, logs) => {
                             if (epoch % 20 === 0) {
@@ -538,7 +478,7 @@
                 
             } catch (error) {
                 document.getElementById('output').innerHTML = `
-                    <p style="color: red;"><strong>Error en el entrenamiento:</strong> ${error.message}</p>
+                    <p style="color: #cb2431;"><strong>Error en el entrenamiento:</strong> ${error.message}</p>
                 `;
                 document.getElementById('loading').style.display = 'none';
             }
@@ -551,8 +491,12 @@
             document.getElementById('output').innerHTML = '';
             document.getElementById('dataPreview').innerHTML = '';
             document.getElementById('results').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
             csvData = null;
-            tensorData = null;
+            if (tensorData) {
+                tensorData.dispose();
+                tensorData = null;
+            }
         }
 
         // Inicialización
